@@ -121,21 +121,29 @@ fn check_diff(args: &Args, diff: Option<PublicItemsDiff>) -> Result<()> {
         (Some(deny), Some(diff)) => {
             for d in deny {
                 match d {
-                    DenyMethod::All => if !diff.is_empty() {
-                        anyhow::bail!(error::Error::DiffDenied)
-                    },
+                    DenyMethod::All => {
+                        if !diff.is_empty() {
+                            anyhow::bail!(error::Error::DiffDenied)
+                        }
+                    }
 
-                    DenyMethod::Additions => if !diff.added.is_empty() {
-                        anyhow::bail!(error::Error::DiffAddedDenied)
-                    },
+                    DenyMethod::Additions => {
+                        if !diff.added.is_empty() {
+                            anyhow::bail!(error::Error::DiffAddedDenied)
+                        }
+                    }
 
-                    DenyMethod::Changes => if !diff.changed.is_empty() {
-                        anyhow::bail!(error::Error::DiffChangedDenied)
-                    },
+                    DenyMethod::Changes => {
+                        if !diff.changed.is_empty() {
+                            anyhow::bail!(error::Error::DiffChangedDenied)
+                        }
+                    }
 
-                    DenyMethod::Deletions => if !diff.removed.is_empty() {
-                        anyhow::bail!(error::Error::DiffDeletionsDenied)
-                    },
+                    DenyMethod::Deletions => {
+                        if !diff.removed.is_empty() {
+                            anyhow::bail!(error::Error::DiffDeletionsDenied)
+                        }
+                    }
                 }
             }
 
