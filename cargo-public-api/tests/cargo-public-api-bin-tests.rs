@@ -83,11 +83,61 @@ fn diff_public_items() {
 
 #[serial]
 #[test]
-fn deny_when_not_diffing() {
+fn deny_all_when_not_diffing() {
     ensure_test_crate_is_cloned(); // Because we still list the API
 
     let mut cmd = Command::cargo_bin("cargo-public-api").unwrap();
     cmd.arg("--deny=all");
+    cmd.assert()
+        .stderr(contains("`--deny` can only be used when diffing"))
+        .failure();
+}
+
+#[serial]
+#[test]
+fn deny_added_when_not_diffing() {
+    ensure_test_crate_is_cloned(); // Because we still list the API
+
+    let mut cmd = Command::cargo_bin("cargo-public-api").unwrap();
+    cmd.arg("--deny=added");
+    cmd.assert()
+        .stderr(contains("`--deny` can only be used when diffing"))
+        .failure();
+}
+
+#[serial]
+#[test]
+fn deny_changed_when_not_diffing() {
+    ensure_test_crate_is_cloned(); // Because we still list the API
+
+    let mut cmd = Command::cargo_bin("cargo-public-api").unwrap();
+    cmd.arg("--deny=changed");
+    cmd.assert()
+        .stderr(contains("`--deny` can only be used when diffing"))
+        .failure();
+}
+
+#[serial]
+#[test]
+fn deny_removed_when_not_diffing() {
+    ensure_test_crate_is_cloned(); // Because we still list the API
+
+    let mut cmd = Command::cargo_bin("cargo-public-api").unwrap();
+    cmd.arg("--deny=removed");
+    cmd.assert()
+        .stderr(contains("`--deny` can only be used when diffing"))
+        .failure();
+}
+
+#[serial]
+#[test]
+fn deny_combination_when_not_diffing() {
+    ensure_test_crate_is_cloned(); // Because we still list the API
+
+    let mut cmd = Command::cargo_bin("cargo-public-api").unwrap();
+    cmd.arg("--deny=added");
+    cmd.arg("--deny=changed");
+    cmd.arg("--deny=removed");
     cmd.assert()
         .stderr(contains("`--deny` can only be used when diffing"))
         .failure();
@@ -120,6 +170,60 @@ fn deny_with_diff() {
     cmd.arg("--deny=all");
     cmd.assert()
         .stderr(contains("The API diff is not allowed as per --deny"))
+        .failure();
+}
+
+#[serial]
+#[test]
+fn deny_added_with_diff() {
+    ensure_test_crate_is_cloned();
+
+    let mut cmd = Command::cargo_bin("cargo-public-api").unwrap();
+    cmd.current_dir(test_crate_path());
+    cmd.arg("--diff-git-checkouts");
+    cmd.arg("v0.0.4");
+    cmd.arg("v0.0.5");
+    cmd.arg("--deny=added");
+    cmd.assert()
+        .stderr(contains("The API diff is not allowed as per --deny=added"))
+        .failure();
+}
+
+#[serial]
+#[test]
+fn deny_changed_with_diff() {
+    ensure_test_crate_is_cloned();
+
+    let mut cmd = Command::cargo_bin("cargo-public-api").unwrap();
+    cmd.current_dir(test_crate_path());
+    cmd.arg("--diff-git-checkouts");
+    cmd.arg("v0.0.4");
+    cmd.arg("v0.0.5");
+    cmd.arg("--deny=changed");
+    cmd.assert()
+        .stderr(contains(
+            r#"Changed items in the public API
+===============================
+(none)"#
+        ))
+        .failure();
+}
+
+#[serial]
+#[test]
+fn deny_removed_with_diff() {
+    ensure_test_crate_is_cloned();
+
+    let mut cmd = Command::cargo_bin("cargo-public-api").unwrap();
+    cmd.current_dir(test_crate_path());
+    cmd.arg("--diff-git-checkouts");
+    cmd.arg("v0.0.4");
+    cmd.arg("v0.0.5");
+    cmd.arg("--deny=removed");
+    cmd.assert()
+        .stderr(contains(
+            "The API diff is not allowed as per --deny=removed",
+        ))
         .failure();
 }
 
