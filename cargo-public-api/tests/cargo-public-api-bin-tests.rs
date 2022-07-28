@@ -217,7 +217,7 @@ fn deny_removed_with_diff() {
     cmd.arg("--diff-git-checkouts");
     cmd.arg("v0.0.4");
     cmd.arg("v0.0.5");
-    cmd.arg("--deny=changed");
+    cmd.arg("--deny=removed");
     cmd.assert()
         .stderr(contains(
             "The API diff is not allowed as per --deny=removed",
