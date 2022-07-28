@@ -113,7 +113,7 @@ fn deny_changed_when_not_diffing() {
     let mut cmd = Command::cargo_bin("cargo-public-api").unwrap();
     cmd.arg("--deny=changed");
     cmd.assert()
-        .stderr(contains("Changed items in the public API\n===============================\n(none)"))
+        .stderr(contains("`--deny` can only be used when diffing"))
         .failure();
 }
 
