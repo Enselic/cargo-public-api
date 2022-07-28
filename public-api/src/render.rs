@@ -296,6 +296,7 @@ fn render_type(ty: &Type) -> Vec<Token> {
             output
         } //  _serde::__private::Result | standard type
         Type::DynTrait(dyn_trait) => {
+            // TODO: Add parenthesis: bar: &'a (dyn for<'b> Trait<'b> + Unpin)
             let mut output = render_sequence_if_not_empty(
                 vec![Token::keyword("dyn"), ws!()],
                 vec![],
