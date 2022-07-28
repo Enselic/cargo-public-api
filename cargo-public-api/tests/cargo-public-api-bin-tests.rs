@@ -199,7 +199,9 @@ fn deny_changed_with_diff() {
     cmd.arg("v0.0.5");
     cmd.arg("--deny=changed");
     cmd.assert()
-        .stderr(contains("The API diff is not allowed as per --deny=changed"))
+        .stderr(contains(
+            "The API diff is not allowed as per --deny=changed",
+        ))
         .failure();
 }
 
@@ -215,7 +217,9 @@ fn deny_removed_with_diff() {
     cmd.arg("v0.0.5");
     cmd.arg("--deny=changed");
     cmd.assert()
-        .stderr(contains("The API diff is not allowed as per --deny=removed"))
+        .stderr(contains(
+            "The API diff is not allowed as per --deny=removed",
+        ))
         .failure();
 }
 
