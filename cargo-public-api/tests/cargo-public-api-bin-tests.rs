@@ -135,7 +135,9 @@ fn deny_combination_when_not_diffing() {
     ensure_test_crate_is_cloned(); // Because we still list the API
 
     let mut cmd = Command::cargo_bin("cargo-public-api").unwrap();
-    cmd.arg("--deny=added,changed,removed");
+    cmd.arg("--deny=added");
+    cmd.arg("--deny=changed");
+    cmd.arg("--deny=removed");
     cmd.assert()
         .stderr(contains("`--deny` can only be used when diffing"))
         .failure();
