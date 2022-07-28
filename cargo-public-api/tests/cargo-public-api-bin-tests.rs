@@ -202,7 +202,9 @@ fn deny_changed_with_diff() {
     cmd.arg("--deny=changed");
     cmd.assert()
         .stderr(contains(
-            "Changed items in the public API\n===============================\n(none)"
+            r#"Changed items in the public API
+===============================
+(none)"#
         ))
         .failure();
 }
