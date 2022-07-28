@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use rustdoc_types::{
     Abi, Constant, FnDecl, GenericArg, GenericArgs, GenericBound, GenericParamDef,
-    GenericParamDefKind, Generics, Header, ItemEnum, MacroKind, Term, Type, TypeBinding,
+    GenericParamDefKind, Generics, Header, ItemEnum, MacroKind, PolyTrait, Term, Type, TypeBinding,
     TypeBindingKind, Variant, WherePredicate,
 };
 
@@ -295,6 +295,20 @@ fn render_type(ty: &Type) -> Vec<Token> {
             }
             output
         } //  _serde::__private::Result | standard type
+        Type::DynTrait(dyn_trait) => {
+            let mut output = render_sequence_if_not_empty(
+                vec![Token::keyword("dyn"), ws!()],
+                vec![],
+                plus(),
+                &dyn_trait.traits,
+                render_poly_trait,
+            );
+            if let Some(lt) = &dyn_trait.lifetime {
+                output.extend(plus());
+                output.extend(vec![Token::lifetime(lt)]);
+            }
+            output
+        }
         Type::Generic(name) => vec![Token::generic(name)],
         Type::Primitive(name) => vec![Token::primitive(name)],
         Type::FunctionPointer(ptr) => {
@@ -526,6 +540,12 @@ fn render_term(term: &Term) -> Vec<Token> {
         Term::Type(ty) => render_type(ty),
         Term::Constant(c) => render_constant(c),
     }
+}
+
+fn render_poly_trait(poly_trait: &PolyTrait) -> Vec<Token> {
+    let mut output = render_higher_rank_trait_bounds(&poly_trait.generic_params);
+    output.extend(render_type(&poly_trait.trait_));
+    output
 }
 
 fn render_generic_arg(arg: &GenericArg) -> Vec<Token> {

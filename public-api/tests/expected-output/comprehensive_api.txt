@@ -31,7 +31,7 @@ pub fn comprehensive_api::RenamedPlain::s2(&self)
 pub fn comprehensive_api::RenamedPlain::s3(&mut self)
 pub fn comprehensive_api::RenamedPlain::s4(&'a self)
 pub fn comprehensive_api::attributes::must_use() -> usize
-pub fn comprehensive_api::functions::dyn_arg(d: &std::io::Write + Send + 'static)
+pub fn comprehensive_api::functions::dyn_arg(d: &dyn std::io::Write + Send + 'static)
 pub fn comprehensive_api::functions::fn_arg(f: impl Fn(bool, RenamedPlain) -> bool, f_mut: impl FnMut())
 pub fn comprehensive_api::functions::generic_arg<T>(t: T) -> T
 pub fn comprehensive_api::functions::generic_bound<T: Sized>(t: T) -> T
