@@ -10,14 +10,14 @@ pub enum DenyMethod {
     /// All forms of API diffs are denied: additions, changes, deletions.
     All,
 
-    /// Deny additions in API diffs
-    Additions,
+    /// Deny added things in API diffs
+    Added,
 
-    /// Deny changes in API diffs
-    Changes,
+    /// Deny changed things in API diffs
+    Changed,
 
-    /// Deny deletions in API diffs
-    Deletions,
+    /// Deny removed things in API diffs
+    Removed,
 }
 
 #[derive(Debug)]
