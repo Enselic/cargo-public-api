@@ -295,34 +295,7 @@ fn render_type(ty: &Type) -> Vec<Token> {
             }
             output
         } //  _serde::__private::Result | standard type
-        Type::DynTrait(dyn_trait) => {
-            let more_than_one = dyn_trait.traits.len() > 1 || dyn_trait.lifetime.is_some();
-
-            let mut output = vec![];
-
-            if more_than_one {
-                output.push(Token::symbol("("));
-            }
-
-            output.extend(render_sequence_if_not_empty(
-                vec![Token::keyword("dyn"), ws!()],
-                vec![],
-                plus(),
-                &dyn_trait.traits,
-                render_poly_trait,
-            ));
-
-            if let Some(lt) = &dyn_trait.lifetime {
-                output.extend(plus());
-                output.extend(vec![Token::lifetime(lt)]);
-            }
-
-            if more_than_one {
-                output.push(Token::symbol(")"));
-            }
-
-            output
-        }
+        Type::DynTrait(dyn_trait) => render_dyn_trait(dyn_trait),
         Type::Generic(name) => vec![Token::generic(name)],
         Type::Primitive(name) => vec![Token::primitive(name)],
         Type::FunctionPointer(ptr) => {
@@ -393,6 +366,29 @@ fn render_type(ty: &Type) -> Vec<Token> {
             output
         }
     }
+}
+
+fn render_dyn_trait(dyn_trait: &rustdoc_types::DynTrait) -> Vec<Token> {
+    let more_than_one = dyn_trait.traits.len() > 1 || dyn_trait.lifetime.is_some();
+    let mut output = vec![];
+    if more_than_one {
+        output.push(Token::symbol("("));
+    }
+    output.extend(render_sequence_if_not_empty(
+        vec![Token::keyword("dyn"), ws!()],
+        vec![],
+        plus(),
+        &dyn_trait.traits,
+        render_poly_trait,
+    ));
+    if let Some(lt) = &dyn_trait.lifetime {
+        output.extend(plus());
+        output.extend(vec![Token::lifetime(lt)]);
+    }
+    if more_than_one {
+        output.push(Token::symbol(")"));
+    }
+    output
 }
 
 fn render_function(
