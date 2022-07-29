@@ -91,7 +91,11 @@ where
 
 pub fn multiple_bounds_inline<T: Debug + Display>(t: T) {}
 
-pub fn dyn_arg(d: &(dyn std::io::Write + Send + 'static)) {}
+pub fn dyn_arg_one_trait(d: &dyn std::io::Write) {}
+
+pub fn dyn_arg_two_traits(d: &(dyn std::io::Write + Send)) {}
+
+pub fn dyn_arg_two_traits_one_lifetime(d: &(dyn std::io::Write + Send + 'static)) {}
 
 pub unsafe fn unsafe_fn() {}
 
