@@ -304,13 +304,13 @@ fn render_type(ty: &Type) -> Vec<Token> {
                 output.push(Token::symbol("("));
             }
 
-            let mut output = render_sequence_if_not_empty(
+            output.extend(render_sequence_if_not_empty(
                 vec![Token::keyword("dyn"), ws!()],
                 vec![],
                 plus(),
                 &dyn_trait.traits,
                 render_poly_trait,
-            );
+            ));
 
             if let Some(lt) = &dyn_trait.lifetime {
                 output.extend(plus());
