@@ -296,7 +296,14 @@ fn render_type(ty: &Type) -> Vec<Token> {
             output
         } //  _serde::__private::Result | standard type
         Type::DynTrait(dyn_trait) => {
-            // TODO: Add parenthesis: bar: &'a (dyn for<'b> Trait<'b> + Unpin)
+            let more_than_one = dyn_trait.traits.len() > 1 || dyn_trait.lifetime.is_some();
+
+            let mut output = vec![];
+
+            if more_than_one {
+                output.push(Token::symbol("("));
+            }
+
             let mut output = render_sequence_if_not_empty(
                 vec![Token::keyword("dyn"), ws!()],
                 vec![],
@@ -304,10 +311,16 @@ fn render_type(ty: &Type) -> Vec<Token> {
                 &dyn_trait.traits,
                 render_poly_trait,
             );
+
             if let Some(lt) = &dyn_trait.lifetime {
                 output.extend(plus());
                 output.extend(vec![Token::lifetime(lt)]);
             }
+
+            if more_than_one {
+                output.push(Token::symbol(")"));
+            }
+
             output
         }
         Type::Generic(name) => vec![Token::generic(name)],
