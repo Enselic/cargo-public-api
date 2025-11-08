@@ -72,7 +72,7 @@ pub fn public_api::Error::source(&self) -> core::option::Option<&(dyn core::erro
 impl core::fmt::Debug for public_api::Error
 pub fn public_api::Error::fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for public_api::Error
-pub fn public_api::Error::fmt(&self, __formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
+pub fn public_api::Error::fmt(&self, _formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 pub struct public_api::Builder
 impl public_api::Builder
 pub fn public_api::Builder::build(self) -> public_api::Result<public_api::PublicApi>

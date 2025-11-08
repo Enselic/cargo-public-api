@@ -117,6 +117,21 @@ impl GenericAssociatedTypes for Unit {
     type WithLifetime<'a> = GatTestStruct1<'a, bool>;
 }
 
+/// Regression test for <https://github.com/cargo-public-api/cargo-public-api/issues/766>
+pub mod issue_766 {
+    pub trait MyTrait {
+        fn method(&self, first: i32, second: i32) -> i32;
+    }
+
+    pub struct MyStruct;
+
+    impl MyTrait for MyStruct {
+        fn method(&self, _first: i32, _second: i32) -> i32 {
+            42
+        }
+    }
+}
+
 /// Regression test for <https://github.com/cargo-public-api/cargo-public-api/issues/429>
 pub mod issue_429 {
     pub struct Handle<T>(T);
@@ -129,3 +144,4 @@ pub mod issue_429 {
         }
     }
 }
+

@@ -143,6 +143,14 @@ pub struct comprehensive_api::impls::issue_429::Handle<T>(_)
 impl comprehensive_api::impls::issue_429::Handle<u32>
 pub fn comprehensive_api::impls::issue_429::Handle<u32>::get_u32() -> u32
 pub type comprehensive_api::impls::issue_429::HU32 = comprehensive_api::impls::issue_429::Handle<u32>
+pub mod comprehensive_api::impls::issue_766
+pub struct comprehensive_api::impls::issue_766::MyStruct
+impl comprehensive_api::impls::issue_766::MyTrait for comprehensive_api::impls::issue_766::MyStruct
+pub fn comprehensive_api::impls::issue_766::MyStruct::method(&self, first: i32, second: i32) -> i32
+pub trait comprehensive_api::impls::issue_766::MyTrait
+pub fn comprehensive_api::impls::issue_766::MyTrait::method(&self, first: i32, second: i32) -> i32
+impl comprehensive_api::impls::issue_766::MyTrait for comprehensive_api::impls::issue_766::MyStruct
+pub fn comprehensive_api::impls::issue_766::MyStruct::method(&self, first: i32, second: i32) -> i32
 pub struct comprehensive_api::impls::GatTestStruct1<'a, T>(_)
 impl<'a, T> comprehensive_api::traits::Simple for comprehensive_api::impls::GatTestStruct1<'a, T>
 pub fn comprehensive_api::impls::GatTestStruct1<'a, T>::act()

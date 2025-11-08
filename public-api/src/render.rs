@@ -35,6 +35,18 @@ pub struct RenderingContext<'c> {
 }
 
 impl<'c> RenderingContext<'c> {
+    /// Check if the parent of an item is a trait impl
+    fn is_parent_trait_impl(&self, public_item: &IntermediatePublicItem<'c>) -> bool {
+        if let Some(parent_id) = public_item.parent_id() {
+            if let Some(parent_item) = self.crate_.index.get(&parent_id) {
+                if let ItemEnum::Impl(impl_) = &parent_item.inner {
+                    return impl_.trait_.is_some();
+                }
+            }
+        }
+        false
+    }
+
     pub fn token_stream(&self, public_item: &IntermediatePublicItem<'c>) -> Vec<Token> {
         let item = public_item.item();
         let item_path = public_item.path();
@@ -130,12 +142,16 @@ impl<'c> RenderingContext<'c> {
                 }
                 output
             }
-            ItemEnum::Function(inner) => self.render_function(
-                self.render_path(item_path),
-                &inner.sig,
-                &inner.generics,
-                &inner.header,
-            ),
+            ItemEnum::Function(inner) => {
+                let is_trait_impl_method = self.is_parent_trait_impl(public_item);
+                self.render_function(
+                    self.render_path(item_path),
+                    &inner.sig,
+                    &inner.generics,
+                    &inner.header,
+                    is_trait_impl_method,
+                )
+            }
             ItemEnum::Trait(trait_) => self.render_trait(trait_, item_path),
             ItemEnum::TraitAlias(_) => self.render_simple(&["trait", "alias"], item_path),
             ItemEnum::Impl(impl_) => {
@@ -451,6 +467,7 @@ impl<'c> RenderingContext<'c> {
         sig: &FunctionSignature,
         generics: &Generics,
         header: &FunctionHeader,
+        is_trait_impl_method: bool,
     ) -> Vec<Token> {
         let mut output = pub_();
         if header.is_unsafe {
@@ -485,7 +502,7 @@ impl<'c> RenderingContext<'c> {
         output.extend(self.render_generic_param_defs(&generics.params));
 
         // Regular parameters and return type
-        output.extend(self.render_fn_decl(sig, true));
+        output.extend(self.render_fn_decl(sig, true, is_trait_impl_method));
 
         // Where predicates
         output.extend(self.render_where_predicates(&generics.where_predicates));
@@ -493,7 +510,7 @@ impl<'c> RenderingContext<'c> {
         output
     }
 
-    fn render_fn_decl(&self, sig: &FunctionSignature, include_underscores: bool) -> Vec<Token> {
+    fn render_fn_decl(&self, sig: &FunctionSignature, include_underscores: bool, is_trait_impl_method: bool) -> Vec<Token> {
         let mut output = vec![];
         // Main arguments
         output.extend(self.render_sequence(
@@ -504,9 +521,15 @@ impl<'c> RenderingContext<'c> {
             |(name, ty)| {
                 self.simplified_self(name, ty).unwrap_or_else(|| {
                     let mut output = vec![];
-                    let ignore_name = name.is_empty() || (name == "_" && !include_underscores);
+                    // For trait impl methods, strip leading underscore from parameter names
+                    let display_name = if is_trait_impl_method && name.starts_with('_') && name.len() > 1 {
+                        &name[1..]
+                    } else {
+                        name
+                    };
+                    let ignore_name = display_name.is_empty() || (display_name == "_" && !include_underscores);
                     if !ignore_name {
-                        output.extend(vec![Token::identifier(name), Token::symbol(":"), ws!()]);
+                        output.extend(vec![Token::identifier(display_name), Token::symbol(":"), ws!()]);
                     }
                     output.extend(self.render_type(ty));
                     output
@@ -603,7 +626,7 @@ impl<'c> RenderingContext<'c> {
     fn render_function_pointer(&self, ptr: &FunctionPointer) -> Vec<Token> {
         let mut output = self.render_higher_rank_trait_bounds(&ptr.generic_params);
         output.push(Token::kind("fn"));
-        output.extend(self.render_fn_decl(&ptr.sig, false));
+        output.extend(self.render_fn_decl(&ptr.sig, false, false));
         output
     }
 
