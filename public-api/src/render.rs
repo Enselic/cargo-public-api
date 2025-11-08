@@ -37,13 +37,11 @@ pub struct RenderingContext<'c> {
 impl<'c> RenderingContext<'c> {
     /// Check if the parent of an item is a trait impl
     fn is_parent_trait_impl(&self, public_item: &IntermediatePublicItem<'c>) -> bool {
-        if let Some(parent_id) = public_item.parent_id() {
-            if let Some(parent_item) = self.crate_.index.get(&parent_id) {
-                if let ItemEnum::Impl(impl_) = &parent_item.inner {
+        if let Some(parent_id) = public_item.parent_id()
+            && let Some(parent_item) = self.crate_.index.get(&parent_id)
+                && let ItemEnum::Impl(impl_) = &parent_item.inner {
                     return impl_.trait_.is_some();
                 }
-            }
-        }
         false
     }
 
