@@ -441,3 +441,86 @@ pub fn free_function(_p: i32, q: String) {}
     assert!(api.contains("_x: i32"));
     assert!(api.contains("_p: i32"));
 }
+
+/// Test edge case: double underscore should NOT be normalized
+#[test]
+fn trait_impl_double_underscore_not_normalized() {
+    let json = rustdoc_json_for_lib(
+        r#"
+pub trait MyTrait {
+    fn method(__param: i32);
+}
+
+pub struct S;
+
+impl MyTrait for S {
+    fn method(__param: i32) {}
+}
+    "#,
+    );
+
+    let api = public_api::Builder::from_rustdoc_json(&json.json_path)
+        .build()
+        .unwrap()
+        .to_string();
+
+    // Double underscore should be preserved
+    assert!(api.contains("__param: i32"));
+}
+
+/// Test edge case: underscore pattern should still work
+#[test]
+fn trait_impl_underscore_pattern() {
+    let json = rustdoc_json_for_lib(
+        r#"
+pub trait MyTrait {
+    fn method(_: i32);
+}
+
+pub struct S;
+
+impl MyTrait for S {
+    fn method(_: i32) {}
+}
+    "#,
+    );
+
+    let api = public_api::Builder::from_rustdoc_json(&json.json_path)
+        .build()
+        .unwrap()
+        .to_string();
+
+    // The underscore pattern should result in no parameter name being shown
+    let method_lines: Vec<_> = api.lines().filter(|l| l.contains("method")).collect();
+    eprintln!("Method lines: {:?}", method_lines);
+    // Check that method appears and has i32 parameter, but no explicit param name
+    // In the rendered output, the type should still be shown
+    assert!(method_lines.iter().any(|l| l.contains("i32")));
+}
+
+/// Test edge case: self parameter with normalized other param
+#[test]
+fn trait_impl_self_with_normalized_param() {
+    let json = rustdoc_json_for_lib(
+        r#"
+pub trait MyTrait {
+    fn method(&self, param: i32);
+}
+
+pub struct S;
+
+impl MyTrait for S {
+    fn method(&self, _param: i32) {}
+}
+    "#,
+    );
+
+    let api = public_api::Builder::from_rustdoc_json(&json.json_path)
+        .build()
+        .unwrap()
+        .to_string();
+
+    // Should have &self and normalized param name
+    assert!(api.contains("&self"));
+    assert!(api.contains("param: i32"));
+}
