@@ -535,12 +535,12 @@ impl<'c> RenderingContext<'c> {
                     let normalized_name = if normalize_trait_impl_params {
                         Self::normalize_param_name(name)
                     } else {
-                        name.to_string()
+                        Cow::Borrowed(name.as_str())
                     };
                     
                     let ignore_name = normalized_name.is_empty() || (normalized_name == "_" && !include_underscores);
                     if !ignore_name {
-                        output.extend(vec![Token::identifier(&normalized_name), Token::symbol(":"), ws!()]);
+                        output.extend(vec![Token::identifier(&*normalized_name), Token::symbol(":"), ws!()]);
                     }
                     output.extend(self.render_type(ty));
                     output
@@ -558,12 +558,13 @@ impl<'c> RenderingContext<'c> {
     /// Normalizes a parameter name by stripping a single leading underscore.
     /// For trait impl methods, this makes `_param` equivalent to `param` in the public API.
     /// Keeps `_` alone or multi-underscore patterns as-is.
-    fn normalize_param_name(name: &str) -> String {
-        if name.starts_with('_') && name.len() > 1 && !name[1..].starts_with('_') {
-            name[1..].to_string()
-        } else {
-            name.to_string()
+    fn normalize_param_name(name: &str) -> Cow<str> {
+        if let Some(stripped) = name.strip_prefix('_') {
+            if !stripped.is_empty() && !stripped.starts_with('_') {
+                return Cow::Owned(stripped.to_string());
+            }
         }
+        Cow::Borrowed(name)
     }
 
     fn simplified_self(&self, name: &str, ty: &Type) -> Option<Vec<Token>> {

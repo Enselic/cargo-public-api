@@ -1,5 +1,8 @@
 # `cargo-public-api` changelog
 
+## Unreleased
+* Normalize leading underscore prefixes in parameter names for trait impl methods. This prevents `_param` vs `param` changes from causing API diffs in trait implementations ([#766](https://github.com/cargo-public-api/cargo-public-api/issues/766)).
+
 ## v0.50.1
 * Support `nightly-2025-08-02` and later.
 

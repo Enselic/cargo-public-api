@@ -492,7 +492,6 @@ impl MyTrait for S {
 
     // The underscore pattern should result in no parameter name being shown
     let method_lines: Vec<_> = api.lines().filter(|l| l.contains("method")).collect();
-    eprintln!("Method lines: {:?}", method_lines);
     // Check that method appears and has i32 parameter, but no explicit param name
     // In the rendered output, the type should still be shown
     assert!(method_lines.iter().any(|l| l.contains("i32")));
