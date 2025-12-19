@@ -1,0 +1,6 @@
+[package]
+name = "trait_impl_params"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]

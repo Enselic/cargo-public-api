@@ -379,3 +379,65 @@ fn assert_public_api(builder: public_api::Builder, test_name: &str) {
 
     snapshot_testing::assert_eq_or_update(api, format!("tests/snapshots/{test_name}.txt"));
 }
+
+/// Test for issue #766: underscore prefixes in trait impl parameters should be normalized
+#[test]
+fn trait_impl_param_underscore_normalization() {
+    // Version 1: parameter without underscore prefix
+    let v1 = rustdoc_json_for_lib(
+        r#"
+pub trait MyTrait {
+    fn trait_method(a: i32, b: String);
+}
+
+pub struct MyStruct;
+
+impl MyTrait for MyStruct {
+    fn trait_method(a: i32, b: String) {}
+}
+    "#,
+    );
+
+    // Version 2: parameter with underscore prefix (should normalize to match v1)
+    let v2 = rustdoc_json_for_lib(
+        r#"
+pub trait MyTrait {
+    fn trait_method(a: i32, b: String);
+}
+
+pub struct MyStruct;
+
+impl MyTrait for MyStruct {
+    fn trait_method(a: i32, _b: String) {}
+}
+    "#,
+    );
+
+    // The two versions should produce identical public API output
+    assert_no_textual_public_api_diff(v1.json_path, v2.json_path);
+}
+
+/// Test that underscore normalization does NOT happen in inherent impls or free functions
+#[test]
+fn no_underscore_normalization_outside_trait_impls() {
+    let json = rustdoc_json_for_lib(
+        r#"
+pub struct MyStruct;
+
+impl MyStruct {
+    pub fn inherent_method(_x: i32, y: String) {}
+}
+
+pub fn free_function(_p: i32, q: String) {}
+    "#,
+    );
+
+    let api = public_api::Builder::from_rustdoc_json(&json.json_path)
+        .build()
+        .unwrap()
+        .to_string();
+
+    // Both _x and _p should remain with underscore prefix
+    assert!(api.contains("_x: i32"));
+    assert!(api.contains("_p: i32"));
+}

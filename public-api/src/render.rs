@@ -86,6 +86,9 @@ impl<'c> RenderingContext<'c> {
             }
         }
 
+        // Check if this function is part of a trait impl
+        let is_in_trait_impl = self.is_function_in_trait_impl(public_item);
+
         let inner_tokens = match &item.inner {
             ItemEnum::Module(_) => self.render_simple(&["mod"], item_path),
             ItemEnum::ExternCrate { .. } => self.render_simple(&["extern", "crate"], item_path),
@@ -135,6 +138,7 @@ impl<'c> RenderingContext<'c> {
                 &inner.sig,
                 &inner.generics,
                 &inner.header,
+                is_in_trait_impl,
             ),
             ItemEnum::Trait(trait_) => self.render_trait(trait_, item_path),
             ItemEnum::TraitAlias(_) => self.render_simple(&["trait", "alias"], item_path),
@@ -250,6 +254,27 @@ impl<'c> RenderingContext<'c> {
         }
 
         resolved_fields
+    }
+
+    /// Checks if a function is part of a trait implementation (not an inherent impl).
+    /// This is used to determine whether to normalize parameter names.
+    fn is_function_in_trait_impl(&self, public_item: &IntermediatePublicItem<'c>) -> bool {
+        // Only functions need this check
+        if !matches!(public_item.item().inner, ItemEnum::Function(_)) {
+            return false;
+        }
+
+        // Check if the parent is an impl with a trait
+        if let Some(parent_id) = public_item.parent_id() {
+            if let Some(parent_item) = self.crate_.index.get(&parent_id) {
+                if let ItemEnum::Impl(impl_) = &parent_item.inner {
+                    // It's a trait impl if it has a trait_ field set
+                    return impl_.trait_.is_some();
+                }
+            }
+        }
+
+        false
     }
 
     fn render_simple(&self, tags: &[&str], path: &[PathComponent]) -> Vec<Token> {
@@ -451,6 +476,7 @@ impl<'c> RenderingContext<'c> {
         sig: &FunctionSignature,
         generics: &Generics,
         header: &FunctionHeader,
+        is_in_trait_impl: bool,
     ) -> Vec<Token> {
         let mut output = pub_();
         if header.is_unsafe {
@@ -485,7 +511,7 @@ impl<'c> RenderingContext<'c> {
         output.extend(self.render_generic_param_defs(&generics.params));
 
         // Regular parameters and return type
-        output.extend(self.render_fn_decl(sig, true));
+        output.extend(self.render_fn_decl(sig, true, is_in_trait_impl));
 
         // Where predicates
         output.extend(self.render_where_predicates(&generics.where_predicates));
@@ -493,7 +519,7 @@ impl<'c> RenderingContext<'c> {
         output
     }
 
-    fn render_fn_decl(&self, sig: &FunctionSignature, include_underscores: bool) -> Vec<Token> {
+    fn render_fn_decl(&self, sig: &FunctionSignature, include_underscores: bool, normalize_trait_impl_params: bool) -> Vec<Token> {
         let mut output = vec![];
         // Main arguments
         output.extend(self.render_sequence(
@@ -504,9 +530,17 @@ impl<'c> RenderingContext<'c> {
             |(name, ty)| {
                 self.simplified_self(name, ty).unwrap_or_else(|| {
                     let mut output = vec![];
-                    let ignore_name = name.is_empty() || (name == "_" && !include_underscores);
+                    
+                    // Normalize parameter name if needed
+                    let normalized_name = if normalize_trait_impl_params {
+                        Self::normalize_param_name(name)
+                    } else {
+                        name.to_string()
+                    };
+                    
+                    let ignore_name = normalized_name.is_empty() || (normalized_name == "_" && !include_underscores);
                     if !ignore_name {
-                        output.extend(vec![Token::identifier(name), Token::symbol(":"), ws!()]);
+                        output.extend(vec![Token::identifier(&normalized_name), Token::symbol(":"), ws!()]);
                     }
                     output.extend(self.render_type(ty));
                     output
@@ -519,6 +553,17 @@ impl<'c> RenderingContext<'c> {
             output.extend(self.render_type(ty));
         }
         output
+    }
+
+    /// Normalizes a parameter name by stripping a single leading underscore.
+    /// For trait impl methods, this makes `_param` equivalent to `param` in the public API.
+    /// Keeps `_` alone or multi-underscore patterns as-is.
+    fn normalize_param_name(name: &str) -> String {
+        if name.starts_with('_') && name.len() > 1 && !name[1..].starts_with('_') {
+            name[1..].to_string()
+        } else {
+            name.to_string()
+        }
     }
 
     fn simplified_self(&self, name: &str, ty: &Type) -> Option<Vec<Token>> {
@@ -603,7 +648,7 @@ impl<'c> RenderingContext<'c> {
     fn render_function_pointer(&self, ptr: &FunctionPointer) -> Vec<Token> {
         let mut output = self.render_higher_rank_trait_bounds(&ptr.generic_params);
         output.push(Token::kind("fn"));
-        output.extend(self.render_fn_decl(&ptr.sig, false));
+        output.extend(self.render_fn_decl(&ptr.sig, false, false));
         output
     }
 
