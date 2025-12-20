@@ -558,7 +558,7 @@ impl<'c> RenderingContext<'c> {
     /// Normalizes a parameter name by stripping a single leading underscore.
     /// For trait impl methods, this makes `_param` equivalent to `param` in the public API.
     /// Keeps `_` alone or multi-underscore patterns as-is.
-    fn normalize_param_name(name: &str) -> Cow<str> {
+    fn normalize_param_name(name: &str) -> Cow<'_, str> {
         if let Some(stripped) = name.strip_prefix('_') {
             if !stripped.is_empty() && !stripped.starts_with('_') {
                 return Cow::Owned(stripped.to_string());
