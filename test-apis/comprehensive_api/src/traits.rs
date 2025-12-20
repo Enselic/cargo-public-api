@@ -57,3 +57,11 @@ pub trait GenericAssociatedTypes {
     type SimpleBound: Simple;
     type WithLifetime<'a>;
 }
+
+/// Trait for testing underscore prefix normalization in trait impl parameters (issue #766)
+pub trait TraitForUnderscoreNormalization {
+    fn method_with_params(a: i32, b: String);
+    fn method_with_self(&self, param: i32);
+    fn method_with_underscore_pattern(_: i32);
+    fn method_with_double_underscore(__param: i32);
+}

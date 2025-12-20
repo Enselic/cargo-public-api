@@ -143,6 +143,13 @@ pub struct comprehensive_api::impls::issue_429::Handle<T>(_)
 impl comprehensive_api::impls::issue_429::Handle<u32>
 pub fn comprehensive_api::impls::issue_429::Handle<u32>::get_u32() -> u32
 pub type comprehensive_api::impls::issue_429::HU32 = comprehensive_api::impls::issue_429::Handle<u32>
+pub mod comprehensive_api::impls::issue_766
+pub struct comprehensive_api::impls::issue_766::TestStruct
+impl comprehensive_api::traits::TraitForUnderscoreNormalization for comprehensive_api::impls::issue_766::TestStruct
+pub fn comprehensive_api::impls::issue_766::TestStruct::method_with_double_underscore(__param: i32)
+pub fn comprehensive_api::impls::issue_766::TestStruct::method_with_params(a: i32, b: alloc::string::String)
+pub fn comprehensive_api::impls::issue_766::TestStruct::method_with_self(&self, param: i32)
+pub fn comprehensive_api::impls::issue_766::TestStruct::method_with_underscore_pattern(_: i32)
 pub struct comprehensive_api::impls::GatTestStruct1<'a, T>(_)
 impl<'a, T> comprehensive_api::traits::Simple for comprehensive_api::impls::GatTestStruct1<'a, T>
 pub fn comprehensive_api::impls::GatTestStruct1<'a, T>::act()
@@ -231,6 +238,16 @@ impl comprehensive_api::traits::Simple for comprehensive_api::structs::Unit
 pub fn comprehensive_api::structs::Unit::act()
 impl<'a, T> comprehensive_api::traits::Simple for comprehensive_api::impls::GatTestStruct1<'a, T>
 pub fn comprehensive_api::impls::GatTestStruct1<'a, T>::act()
+pub trait comprehensive_api::traits::TraitForUnderscoreNormalization
+pub fn comprehensive_api::traits::TraitForUnderscoreNormalization::method_with_double_underscore(__param: i32)
+pub fn comprehensive_api::traits::TraitForUnderscoreNormalization::method_with_params(a: i32, b: alloc::string::String)
+pub fn comprehensive_api::traits::TraitForUnderscoreNormalization::method_with_self(&self, param: i32)
+pub fn comprehensive_api::traits::TraitForUnderscoreNormalization::method_with_underscore_pattern(_: i32)
+impl comprehensive_api::traits::TraitForUnderscoreNormalization for comprehensive_api::impls::issue_766::TestStruct
+pub fn comprehensive_api::impls::issue_766::TestStruct::method_with_double_underscore(__param: i32)
+pub fn comprehensive_api::impls::issue_766::TestStruct::method_with_params(a: i32, b: alloc::string::String)
+pub fn comprehensive_api::impls::issue_766::TestStruct::method_with_self(&self, param: i32)
+pub fn comprehensive_api::impls::issue_766::TestStruct::method_with_underscore_pattern(_: i32)
 pub trait comprehensive_api::traits::TraitReferencingOwnAssociatedType
 pub type comprehensive_api::traits::TraitReferencingOwnAssociatedType::OwnAssociatedType
 pub fn comprehensive_api::traits::TraitReferencingOwnAssociatedType::own_associated_type_output(&self) -> Self::OwnAssociatedType

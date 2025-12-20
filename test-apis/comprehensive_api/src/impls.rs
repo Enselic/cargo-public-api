@@ -1,7 +1,8 @@
 use crate::{
     structs::{Plain, Unit, WithLifetimeAndGenericParam},
     traits::{
-        GenericAssociatedTypes, Simple, TraitReferencingOwnAssociatedType, TraitWithGenerics,
+        GenericAssociatedTypes, Simple, TraitForUnderscoreNormalization,
+        TraitReferencingOwnAssociatedType, TraitWithGenerics,
     },
 };
 
@@ -126,6 +127,33 @@ pub mod issue_429 {
     impl HU32 {
         pub fn get_u32() -> u32 {
             0
+        }
+    }
+}
+
+/// Regression test for <https://github.com/cargo-public-api/cargo-public-api/issues/766>
+/// Tests underscore prefix normalization in trait impl parameters
+pub mod issue_766 {
+    use crate::traits::TraitForUnderscoreNormalization;
+
+    pub struct TestStruct;
+
+    impl TraitForUnderscoreNormalization for TestStruct {
+        // Parameters with underscore prefix should be normalized
+        fn method_with_params(_a: i32, _b: String) {
+            // Unused parameters prefixed with underscore
+        }
+
+        fn method_with_self(&self, _param: i32) {
+            // Self parameter with unused param
+        }
+
+        fn method_with_underscore_pattern(_: i32) {
+            // Underscore pattern should remain as-is
+        }
+
+        fn method_with_double_underscore(__param: i32) {
+            // Double underscore should NOT be normalized
         }
     }
 }
