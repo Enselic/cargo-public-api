@@ -1,7 +1,8 @@
 use crate::{
     structs::{Plain, Unit, WithLifetimeAndGenericParam},
     traits::{
-        GenericAssociatedTypes, Simple, TraitReferencingOwnAssociatedType, TraitWithGenerics,
+        GenericAssociatedTypes, Simple, TraitForUnderscoreNormalization,
+        TraitReferencingOwnAssociatedType, TraitWithGenerics,
     },
 };
 
@@ -115,6 +116,28 @@ impl GenericAssociatedTypes for Unit {
     type SimpleBound = GatTestStruct1<'static, usize>;
 
     type WithLifetime<'a> = GatTestStruct1<'a, bool>;
+}
+
+/// Struct for testing various trait implementations
+pub struct UnderscoreTestStruct;
+
+impl TraitForUnderscoreNormalization for UnderscoreTestStruct {
+    // Parameters with underscore prefix should be normalized
+    fn method_with_params(_a: i32, _b: String) {
+        // Unused parameters prefixed with underscore
+    }
+
+    fn method_with_self(&self, _param: i32) {
+        // Self parameter with unused param
+    }
+
+    fn method_with_underscore_pattern(_: i32) {
+        // Underscore pattern should remain as-is
+    }
+
+    fn method_with_double_underscore(__param: i32) {
+        // Double underscore should NOT be normalized
+    }
 }
 
 /// Regression test for <https://github.com/cargo-public-api/cargo-public-api/issues/429>
