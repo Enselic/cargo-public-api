@@ -58,7 +58,7 @@ pub trait GenericAssociatedTypes {
     type WithLifetime<'a>;
 }
 
-/// Trait for testing underscore prefix normalization in trait impl parameters (issue #766)
+/// Trait with various parameter patterns for testing
 pub trait TraitForUnderscoreNormalization {
     fn method_with_params(a: i32, b: String);
     fn method_with_self(&self, param: i32);
